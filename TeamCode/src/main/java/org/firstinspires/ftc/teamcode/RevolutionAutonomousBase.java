@@ -38,6 +38,7 @@ public abstract class RevolutionAutonomousBase extends RevolutionVelocityBase {
         STATE_DRIVE_TO_RAMP,
         STATE_START_DRIVE_PATH,
         STATE_CORNER_PATH,
+        STATE_CRYPTOGRAPH,
     }
 
     final float THROWING_TIME = 0.5f;
@@ -121,7 +122,9 @@ public abstract class RevolutionAutonomousBase extends RevolutionVelocityBase {
     public void loop() {
 
         telemetry.addData("currentState: ", currentState);
+        telemetry.addData("segment index", currentPathSegmentIndex);
         telemetry.addData("Gyro", turningGyro.getHeading());
+
         //telemetry.addData("Target", segment.Angle);
         int heading = turningGyro.getHeading();
 
@@ -129,9 +132,9 @@ public abstract class RevolutionAutonomousBase extends RevolutionVelocityBase {
 
             case STATE_INITIAL:
 
-                if (!turningGyro.isCalibrating()) {
+                    if (!turningGyro.isCalibrating()) {
 
-                    steadyHeading = heading;
+                        steadyHeading = heading;
                     runWithoutEncoders();
                     switchToNextState();
                 }
@@ -339,7 +342,7 @@ public abstract class RevolutionAutonomousBase extends RevolutionVelocityBase {
 
                     startPath(new DrivePathSegment[] {
 
-                            new DrivePathSegment(-1.0f, 0.5f, DrivePathSegment.LINEAR),
+                            new DrivePathSegment(-1.5f, 0.5f, DrivePathSegment.LINEAR),
                     });
 
                     stateStarted = true;
@@ -419,14 +422,14 @@ public abstract class RevolutionAutonomousBase extends RevolutionVelocityBase {
 
             case STATE_PUSH_BEACON:
 
-                if (elapsedTimeForCurrentState.time() >= 2.5f) {
+                if (elapsedTimeForCurrentState.time() >= 3.0f) {
 
                     TurnOffAllDriveMotors();
                     switchToNextState();
 
                 } else {
 
-                    setPowerForLinearMove(0.1f);
+                    setPowerForLinearMove(0.2f);
                 }
 
                 break;
@@ -453,7 +456,7 @@ public abstract class RevolutionAutonomousBase extends RevolutionVelocityBase {
                 } else {
 
                     if (elapsedTimeForCurrentState.time() >= 3.0f) {
-
+                        new DrivePathSegment(-1.5f, 0.5f, DrivePathSegment.LINEAR);
                         TurnOffAllDriveMotors();
                         restartBeaconSequence();
                     }
@@ -738,9 +741,6 @@ public abstract class RevolutionAutonomousBase extends RevolutionVelocityBase {
                     segment.Angle -= 360;
                 }
 
-                turnStartValueLeft = getLeftPosition();
-                turnStartValueRight = getRightPosition();
-
                 runWithoutEncoders();
                 double currentAngle = heading;
                 segment.isClockwise = !counterclockwiseTurnNeeded(currentAngle);
@@ -856,22 +856,32 @@ public abstract class RevolutionAutonomousBase extends RevolutionVelocityBase {
         return false;
     }
 
-    public int getRightPosition() {
+    public int getFrontRightPosition() {
 
         return frontRightMotor.getCurrentPosition();
     }
 
-    public int getLeftPosition() {
+    public int getFrontLeftPosition() {
 
         return frontLeftMotor.getCurrentPosition();
     }
 
+    public int getBackRightPosition() {
+
+        return backRightMotor.getCurrentPosition();
+    }
+
+    public int getBackLeftPosition() {
+
+        return backLeftMotor.getCurrentPosition();
+    }
+
     public void setEncoderTargetsToCurrentPosition() {
 
-        currentEncoderTargets.frontLeftTarget = getLeftPosition();
-        currentEncoderTargets.frontRightTarget = getRightPosition();
-        currentEncoderTargets.backLeftTarget = getLeftPosition();
-        currentEncoderTargets.backRightTarget = getRightPosition();
+        currentEncoderTargets.frontLeftTarget = getFrontLeftPosition();
+        currentEncoderTargets.frontRightTarget = getFrontRightPosition();
+        currentEncoderTargets.backLeftTarget = getBackLeftPosition();
+        currentEncoderTargets.backRightTarget = getBackRightPosition();
     }
 
     public boolean segmentComplete(int heading) {
@@ -951,15 +961,19 @@ public abstract class RevolutionAutonomousBase extends RevolutionVelocityBase {
 
     public boolean linearMoveComplete() {
 
-        int leftPosition = getLeftPosition();
-        int leftTarget = currentEncoderTargets.frontLeftTarget;
-        int rightPosition = getRightPosition();
-        int rightTarget = currentEncoderTargets.frontRightTarget;
+        int frontLeftTarget = currentEncoderTargets.frontLeftTarget;
+        int frontRightTarget = currentEncoderTargets.frontRightTarget;
+        int backLeftTarget = currentEncoderTargets.backLeftTarget;
+        int backRightTarget = currentEncoderTargets.backRightTarget;
 
-        return (isPositionClose(leftPosition, leftTarget) ||
-                isPositionClose(rightPosition, rightTarget)) ||
-                (isPastTarget(leftPosition, leftTarget, segment.LeftSideDistance) ||
-                        isPastTarget(rightPosition, rightTarget, segment.LeftSideDistance));
+        return (//isPositionClose(getFrontRightPosition(), frontRightTarget) ||
+                //isPositionClose(getFrontLeftPosition(), frontLeftTarget) ||
+                isPositionClose(getBackRightPosition(), backRightTarget) ||
+                isPositionClose(getBackLeftPosition(), backLeftTarget)) ||
+                (//isPastTarget(getFrontRightPosition(), frontRightTarget, segment.RightSideDistance) ||
+                        //isPastTarget(getFrontLeftPosition(), frontLeftTarget, segment.LeftSideDistance) ||
+                        isPastTarget(getBackRightPosition(), backRightTarget, segment.RightSideDistance) ||
+                        isPastTarget(getBackLeftPosition(), backLeftTarget, segment.LeftSideDistance));
     }
 
     public boolean isPositionClose(int position, int target) {

@@ -73,8 +73,6 @@ public abstract class RevolutionVelocityBase extends OpMode {
     public final float BALL_CLAMP_SERVO_POSITION_STOPPED = 0.5f;
     public final float BALL_CLAMP_SERVO_POSITION_BKWD = 1.0f;
 
-    int turnStartValueLeft;
-    int turnStartValueRight;
     int driveDirection;
     GyroSensor turningGyro;
     TouchSensor rightBumper;
@@ -125,6 +123,8 @@ public abstract class RevolutionVelocityBase extends OpMode {
         winchMotorTwo.setDirection(DcMotorSimple.Direction.FORWARD);
 
         turningGyro = hardwareMap.gyroSensor.get("gyroSensor");
+
+        ballClampServo.setPosition(BALL_CLAMP_SERVO_POSITION_STOPPED);
 
         runWithoutEncoders();
         rightBeaconSensor.enableLed(false);
@@ -226,16 +226,6 @@ public abstract class RevolutionVelocityBase extends OpMode {
         frontLeftMotor.setPower(levels.frontLeftPower);
         backRightMotor.setPower(levels.backRightPower);
         backLeftMotor.setPower(levels.backLeftPower);
-    }
-
-    public int getRightPosition() {
-
-        return frontRightMotor.getCurrentPosition();
-    }
-
-    public int getLeftPosition() {
-
-        return frontLeftMotor.getCurrentPosition();
     }
 
     public boolean isPastTarget(int position, int target, float distanceToMove) {

@@ -20,19 +20,18 @@ public abstract class RevLaunchAndBeaconBase extends RevolutionAutonomousBase {
                 State.STATE_LAUNCH_BALL,
                 State.STATE_START_BEACON_PATH,
                 State.STATE_DRIVE,
-                State.STATE_BACK_UP,
                 State.STATE_FIND_WHITE_LINE,
                 State.STATE_LINE_UP_TO_BEACON,
                 State.STATE_PUSH_BEACON,
                 State.STATE_BACK_UP,
-                State.STATE_CHECK_BEACON,
+                State.STATE_CHECK_BEACON_2S,
                 State.STATE_TURN_TO_ZERO,
                 State.STATE_DRIVE_TO_BEACON,
                 State.STATE_TURN_TO_BEACON,
                 State.STATE_LINE_UP_TO_BEACON,
                 State.STATE_PUSH_BEACON,
                 State.STATE_BACK_UP,
-                State.STATE_CHECK_BEACON,
+                State.STATE_CHECK_BEACON_2S,
                 State.STATE_STOP
         };
     }
